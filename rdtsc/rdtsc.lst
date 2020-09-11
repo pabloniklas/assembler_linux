@@ -1,0 +1,85 @@
+     1                                  ;
+     2                                  ; https://en.wikibooks.org/wiki/X86_Assembly/Other_Instructions
+     3                                  ;
+     4                                  ; $ nasm -felf -g rdtsc.asm -l rdtsc.lst
+     5                                  ; $ gcc -m32 -o rdtsc rdtsc.o
+     6                                  ; $ ./rdtsc
+     7                                  ;
+     8                                  
+     9                                  global main
+    10                                  
+    11                                  extern printf
+    12                                  
+    13                                  section .data
+    14                                      align 4
+    15 00000000 00002041                    a:  dd 10.0
+    16 00000004 0000A040                    b:  dd 5.0
+    17 00000008 00000040                    c:  dd 2.0
+    18                                  
+    19 0000000C 53616C696461203D3D-         fmtStr: db "Salida ==> edx:eax = %llu edx = %d eax = %d", 0x0A, 0
+    19 00000015 3E206564783A656178-
+    19 0000001E 203D20256C6C752065-
+    19 00000027 6478203D2025642065-
+    19 00000030 6178203D2025640A00 
+    20                                  
+    21                                  section .bss
+    22                                      align 4
+    23 00000000 <res 00000004>              cycleLow:   resd 1
+    24 00000004 <res 00000004>              cycleHigh:  resd 1
+    25 00000008 <res 00000004>              result:     resd 1
+    26                                  
+    27                                  section .text
+    28                                      main:           ; Se define main porque linkeamos con gcc.
+    29                                  
+    30                                  ;
+    31                                  ;   op  dst,  src
+    32                                  ;
+    33 00000000 31C0                        xor eax, eax  ; reset del registro eax.
+    34 00000002 0FA2                        cpuid ; Returns processor identification and feature information to the EAX, EBX, ECX, and EDX registers, according to the input value entered initially in the EAX register.
+    35 00000004 0F31                        rdtsc ; determine how many CPU ticks took place since the processor was reset.
+    36 00000006 A3[00000000]                mov [cycleLow], eax
+    37 0000000B 8915[04000000]              mov [cycleHigh], edx
+    38                                  
+    39                                      ;
+    40                                      ; Do some work before measurements
+    41                                      ;
+    42 00000011 D905[00000000]              fld dword [a] ; fld Pushes the source operand onto the FPU register stack.
+    43 00000017 D905[08000000]              fld dword [c]
+    44 0000001D DEC9                        fmulp   st1 ; Multiplies the destination and source operands and stores the product in the destination location.
+    45 0000001F DEC9                        fmulp   st1
+    46 00000021 D905[04000000]              fld dword [b]
+    47 00000027 D905[04000000]              fld dword [b]
+    48 0000002D DEC9                        fmulp   st1
+    49 0000002F DEC1                        faddp   st1 ; Adds the destination and source operands and stores the sum in the destination location.
+    50 00000031 D9FA                        fsqrt   ; Computes the square root of the source value in the ST(0) register and stores the result in ST(0).
+    51 00000033 D91D[08000000]              fstp    dword [result]
+    52                                      ;
+    53                                      ; Done work
+    54                                      ;
+    55                                  
+    56 00000039 0FA2                        cpuid
+    57 0000003B 0F31                        rdtsc
+    58                                      ;
+    59                                      ; break points so we can examine the values
+    60                                      ; before we alter the data in edx:eax and
+    61                                      ; before we print out the results.
+    62                                      ;
+    63                                  break1:
+    64 0000003D 2B05[00000000]              sub eax, [cycleLow]
+    65 00000043 1B15[04000000]              sbb edx, [cycleHigh]
+    66                                  break2:
+    67 00000049 50                          push    eax
+    68 0000004A 52                          push    edx
+    69 0000004B 52                          push    edx
+    70 0000004C 50                          push    eax
+    71 0000004D 68[0C000000]                push    dword fmtStr
+    72 00000052 E8(00000000)                call    printf
+    73 00000057 83C414                      add esp, 20     ; Pop stack 5 times 4 bytes
+    74                                  
+    75                                      ;
+    76                                      ; Call exit(3) syscall
+    77                                      ;   void exit(int status)
+    78                                      ;
+    79 0000005A BB00000000                  mov ebx, 0      ; Arg one: the status
+    80 0000005F B801000000                  mov eax, 1      ; Syscall number:
+    81 00000064 CD80                        int     0x80

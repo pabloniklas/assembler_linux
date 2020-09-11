@@ -1,0 +1,47 @@
+     1                                  ;
+     2                                  ; Jugando con los loops en assembler.
+     3                                  ;
+     4                                  
+     5                                  section .text
+     6                                  global main
+     7                                  
+     8                                  main:
+     9 00000000 BA15000000                  mov edx,len ;message length
+    10 00000005 B9[00000000]                mov ecx,msg ;message to write
+    11 0000000A BB01000000                  mov ebx,1 ;file descriptor (stdout)
+    12 0000000F B804000000                  mov eax,4 ;system call number (sys_write
+    13 00000014 CD80                        int 0x80 ;call kernel
+    14                                  
+    15 00000016 B905000000                  mov ecx, 5
+    16                                  
+    17                                  start_loop:
+    18                                  
+    19 0000001B 51                          push ecx
+    20                                  
+    21 0000001C BA09000000                  mov edx,9 ;message length
+    22 00000021 B9[15000000]                mov ecx,s2 ;message to write
+    23 00000026 BB01000000                  mov ebx,1 ;file descriptor (stdout)
+    24 0000002B B804000000                  mov eax,4 ;system call number (sys_write)
+    25 00000030 CD80                        int 0x80 ;call kernel
+    26                                  
+    27 00000032 BA01000000                  mov edx,1 ;message length
+    28 00000037 B9[1E000000]                mov ecx,nl ;message to write
+    29 0000003C BB01000000                  mov ebx,1 ;file descriptor (stdout)
+    30 00000041 B804000000                  mov eax,4 ;system call number (sys_write)
+    31 00000046 CD80                        int 0x80 ;call kernel
+    32                                  
+    33 00000048 59                          pop ecx
+    34                                  
+    35 00000049 E2D0                        loop start_loop
+    36                                  
+    37 0000004B B801000000                  mov eax,1 ;system call number (sys_exit)
+    38 00000050 CD80                        int 0x80 ;call kernel
+    39                                  
+    40                                  section .data
+    41 00000000 4D6F737472616E646F-         msg db 'Mostrando estrellas.',0xa ;a message
+    42 00000009 2065737472656C6C61-
+    43 00000012 732E0A             
+    44                                      len equ $ - msg
+    45 00000015 2A<rept>                    s2 times 9 db '*'
+    46 0000001E 0A                          nl db 0xa
+    47                                  

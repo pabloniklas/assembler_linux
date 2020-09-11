@@ -1,0 +1,19 @@
+     1                                  section .data
+     2                                  section .text
+     3                                  
+     4                                      global _start
+     5                                      
+     6                                      
+     7                                  _start:
+     8 00000000 90                          nop
+     9                                  
+    10                                      
+    11 00000001 66B8FE67                    mov ax,067FEh
+    12 00000005 6689C3                      mov bx,ax
+    13 00000008 88F9                        mov cl,bh
+    14 0000000A 88DD                        mov ch,bl
+    15                                      
+    16                                      
+    17 0000000C 90                          nop
+    18                                      
+    19                                  section .bss

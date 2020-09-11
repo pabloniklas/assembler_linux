@@ -1,0 +1,29 @@
+     1                                  ; nasm -f elf64 demo.asm
+     2                                  ; ld -s -o demo demo.o
+     3                                  ;
+     4                                  
+     5                                  SECTION .data
+     6                                  
+     7 00000000 486F6C61206D756E64-     EatMsg: db "Hola mundo." ,10
+     7 00000009 6F2E0A             
+     8                                  EatLen: equ $-EatMsg
+     9                                  
+    10                                  SECTION .bss
+    11                                  
+    12                                  SECTION .text
+    13                                  
+    14                                  global _start
+    15                                  
+    16                                  _start:
+    17 00000000 90                      	nop
+    18 00000001 B804000000              	mov eax, 4	; Imprimir texto
+    19 00000006 BB02000000              	mov ebx, 2	; Por cual FD
+    20 0000000B B9[00000000]            	mov ecx, EatMsg
+    21 00000010 BA0C000000              	mov edx, EatLen
+    22                                  llamada1:
+    23 00000015 CD80                    	int 80H		;Invoco kernel
+    24                                  
+    25 00000017 B801000000              	mov eax, 1	;Salgo
+    26 0000001C BB18000000              	mov ebx, 24 	;RC=0
+    27                                  llamada2:
+    28 00000021 CD80                    	int 80H		;Invoco kernel
